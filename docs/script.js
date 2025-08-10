@@ -1,4 +1,3 @@
-`javascript
 // إعدادات الوضع
 let mode = localStorage.getItem('themeMode') || 'light';
 applyTheme(mode);
@@ -52,4 +51,3 @@ function analyzeText(text) {
 
   return { type, tone, summary, suggestions };
 }
-`
