@@ -1,78 +1,55 @@
-`css
-/ إعدادات عامة /
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  transition: background 0.5s, color 0.5s;
-  background: #ffffff;
-  color: #222222;
+`javascript
+// إعدادات الوضع
+let mode = localStorage.getItem('themeMode') || 'light';
+applyTheme(mode);
+
+// زر تغيير الوضع
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const next = mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light';
+  mode = next;
+  localStorage.setItem('themeMode', mode);
+  applyTheme(mode);
+});
+
+// تطبيق الوضع حسب الاختيار
+function applyTheme(selected) {
+  const hour = new Date().getHours();
+  const isDark = selected === 'dark' || (selected === 'auto' && (hour >= 19 || hour < 6));
+  document.body.classList.toggle('dark-mode', isDark);
 }
 
-/ الوضع الليلي /
-body.dark-mode {
-  background: #0d0d0d;
-  color: #f0f0f0;
-}
+// التحليل الفوري
+const input = document.getElementById('content-input');
+const output = document.getElementById('analysis-output');
 
-/ رأس الصفحة /
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-}
-
-/ زر تغيير الوضع /
-
-theme-toggle {
-  font-size: 1.5rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-/ الشعار /
-
-logo-container {
-  width: 100px;
-  height: 100px;
-}
-
-/ المحرر /
-
-content-input {
-  width: 90%;
-  height: 150px;
-  margin: 1rem auto;
-  display: block;
-  padding: 1rem;
-  font-size: 1rem;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  resize: vertical;
-}
-
-/ نافذة التحليل /
-
-analysis-panel {
-  width: 90%;
-  margin: 1rem auto;
-  padding: 1rem;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #e0f7fa, #fce4ec);
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-body.dark-mode #analysis-panel {
-  background: linear-gradient(135deg, #1a237e, #4a148c);
-  color: #fff;
-}
-
-/ مظهر متجاوب /
-@media (max-width: 600px) {
-
-content-input, #analysis-panel {
-    width: 95%;
+input.addEventListener('input', () => {
+  const text = input.value.trim();
+  if (!text) {
+    output.innerHTML = 'ابدأ الكتابة لعرض التحليل...';
+    return;
   }
+
+  const analysis = analyzeText(text);
+  output.innerHTML = `
+    <p><strong>نوع المحتوى:</strong> ${analysis.type}</p>
+    <p><strong>نبرة النص:</strong> ${analysis.tone}</p>
+    <p><strong>ملخص:</strong> ${analysis.summary}</p>
+    <p><strong>توصيات:</strong> ${analysis.suggestions.join(', ')}</p>
+  `;
+});
+
+// دالة تحليل النص
+function analyzeText(text) {
+  const length = text.length;
+  const type = length > 300 ? 'مقال طويل' : length > 100 ? 'نص متوسط' : 'ملاحظة قصيرة';
+  const tone = /!|\؟/.test(text) ? 'عاطفي أو تفاعلي' : 'هادئ أو وصفي';
+  const summary = text.slice(0, 100) + (length > 100 ? '...' : '');
+  const suggestions = [];
+
+  if (!/[.!?]/.test(text)) suggestions.push('أضف علامات ترقيم');
+  if (length < 50) suggestions.push('وسّع الفكرة');
+  if (/كثير|جداً|تماماً/.test(text)) suggestions.push('قلل التكرار');
+
+  return { type, tone, summary, suggestions };
 }
 `
